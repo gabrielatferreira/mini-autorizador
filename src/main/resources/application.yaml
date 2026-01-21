@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: miniautorizador
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/miniautorizador?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Credenciais de acesso à API (Basic Auth)
+# Estas credenciais foram definidas no arquivo de configuração apenas para garantir a
+# portabilidade e facilidade na execução do teste pelo avaliador.
+# Para produção, o sistema está preparado para ler via variáveis de ambiente.
+api:
+  security:
+    user: ${API_USER:username}
+    pass: ${API_PASS:password}
