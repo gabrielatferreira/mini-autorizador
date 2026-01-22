@@ -1,6 +1,7 @@
 package com.testerv.miniautorizador.service;
 
 import com.testerv.miniautorizador.dto.TransactionDTO;
+import com.testerv.miniautorizador.enums.TransactionStatus;
 import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.repository.CardRepository;
@@ -29,7 +30,7 @@ public class TransactionService {
 
     private Card getCardCheckingExistence(String cardNumber) {
         return cardRepository.findByCardNumberWithLock(cardNumber)
-                .orElseThrow(() -> new TransactionException("CARTAO_INEXISTENTE"));
+                .orElseThrow(() -> new TransactionException(TransactionStatus.CARTAO_INEXISTENTE.getDescription()));
     }
 
     private void executeDebit(Card card, BigDecimal value) {
@@ -38,11 +39,11 @@ public class TransactionService {
 
     private void validatePassword(Card card, String providedPassword) {
         boolean isInvalid = !card.getPassword().equals(providedPassword);
-        if (isInvalid) throw new TransactionException("SENHA_INVALIDA");
+        if (isInvalid) throw new TransactionException(TransactionStatus.SENHA_INVALIDA.getDescription());
     }
 
     private void validateBalance(Card card, BigDecimal value) {
         boolean hasNoFunds = card.getBalance().compareTo(value) < 0;
-        if (hasNoFunds) throw new TransactionException("SALDO_INSUFICIENTE");
+        if (hasNoFunds) throw new TransactionException(TransactionStatus.SALDO_INSUFICIENTE.getDescription());
     }
 }
