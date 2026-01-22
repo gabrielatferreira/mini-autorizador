@@ -1,6 +1,7 @@
 package com.testerv.miniautorizador.service;
 
 import com.testerv.miniautorizador.dto.CardRequestDTO;
+import com.testerv.miniautorizador.enums.TransactionStatus;
 import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.repository.CardRepository;
@@ -31,6 +32,6 @@ public class CardService {
     public BigDecimal getBalance(String cardNumber) {
         return cardRepository.findById(cardNumber)
                 .map(Card::getBalance)
-                .orElseThrow(() -> new TransactionException("CARTAO_INEXISTENTE"));
+                .orElseThrow(() -> new TransactionException(TransactionStatus.CARTAO_INEXISTENTE.getDescription()));
     }
 }
