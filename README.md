@@ -1,3 +1,103 @@
+# 💳 Mini-Autorizador VR
+
+Este projeto é uma implementação de um autorizador de transações de benefícios (Refeição/Alimentação). A solução foca em robustez, consistência de dados em cenários de alta concorrência e clareza de código seguindo os princípios de Clean Code.
+
+---
+
+## 🚀 **Como Executar o Projeto**
+
+### 1. Requisitos
+* Docker e Docker Compose
+* Java 17+ (ou 21+)
+* Maven 3.8+
+
+### 2. Subindo o Banco de Dados (MySQL)
+O projeto utiliza o MySQL conforme especificado no desafio. Para subir o container:
+```bash
+docker-compose up -d
+```
+
+**Nota:** Se houver erro de porta ocupada (3306), certifique-se de que não há um serviço MySQL local rodando no seu sistema operacional.
+
+### 3. Rodando a aplicação
+```bash
+mvn spring-boot:run
+```
+
+---
+
+## 🛠️ **Tecnologias Utilizadas**
+
+* Java 21 & Spring Boot 3.5.9
+* Spring Data JPA & Hibernate
+* MySQL 5.7 (Persistência de Cartões)
+* Spring Security (Autenticação Basic Auth)
+* OpenAPI 3 / Swagger (Documentação Interativa)
+* JUnit 5 / Mockito (Testes de Unidade e Integração)
+
+---
+
+## 📐 **Arquitetura e Design Patterns**
+
+A aplicação segue uma arquitetura multicamadas (**Controller -> Service -> Repository**), garantindo baixo acoplamento e alta coesão.
+
+### **Diferenciais de Implementação:**
+* **Static Factory Methods:** DTOs estruturados com métodos estáticos para conversão de entidades, tornando o código mais expressivo e limpo.
+* **Global Exception Handler:** Centralização do tratamento de erros com `@ControllerAdvice`, mapeando exceções de negócio para os códigos HTTP exatos (**201, 404, 422**).
+* **Imutabilidade com Records:** Uso de `Records` do Java para transporte de dados (DTOs), aproveitando a segurança de objetos imutáveis.
+* **Custom Serialization:** Uso de `@JsonPropertyOrder` e `@JsonInclude` para garantir que o JSON de saída siga rigorosamente o contrato do desafio (ex: senha aparecendo antes do número do cartão).
+
+---
+
+## 🔒 **Desafio: Garantia de Concorrência**
+
+Para resolver o problema de transações simultâneas que poderiam causar o fenômeno de **"Lost Update"** (ex: dois débitos simultâneos de R$10 em um cartão com saldo de R$10), a solução utiliza **Pessimistic Locking (Lock Pessimista)**.
+
+* **Estratégia:** Foi utilizado `@Lock(LockModeType.PESSIMISTIC_WRITE)` no repositório ao buscar o cartão para transação.
+* **Impacto:** Ao iniciar uma validação de transação, o banco de dados bloqueia a linha do cartão para escrita. Outras requisições aguardam a conclusão da primeira transação para ler o saldo atualizado, garantindo que o saldo nunca fique inconsistente ou negativo.
+
+---
+
+## 📖 **Documentação**
+
+### **Javadoc (Documentação Interna)**
+Todo o código-fonte foi documentado utilizando o padrão **Javadoc**, descrevendo a lógica de negócio, parâmetros de métodos e regras de validação.
+* **Para gerar o site:** `mvn javadoc:javadoc`
+* **Os arquivos gerados estarão em:** `target/site/apidocs/index.html`
+
+### **Swagger UI (Documentação Externa)**
+Interface interativa para testes dos endpoints sem a necessidade de ferramentas externas:
+
+👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+---
+
+## 🔐 **Autenticação**
+A API está protegida via **Basic Auth** conforme requisitos:
+* **Username:** `username`
+* **Password:** `password`
+
+---
+
+## 🧪 **Testes Automatizados**
+A cobertura de testes foi priorizada nos fluxos críticos, garantindo que a lógica de negócio seja validada além da simples passagem de código:
+* **Criação:** Sucesso e erro **422** (cartão duplicado).
+* **Saldo:** Retorno **200** (sucesso) e **404** (cartão inexistente).
+* **Transação:** Validação de saldo insuficiente, senha inválida e cartão inexistente.
+
+Para rodar a suite de testes:
+```bash
+mvn test
+```
+---
+
+## 📋 **Suposições do Projeto**
+
+* **Estrutura de Erro 422:** Em caso de tentativa de criação de cartão existente, o sistema retorna o corpo do cartão exatamente conforme enviado no request original (**senha** e **numeroCartao**), respeitando a ordem e os campos exigidos no contrato.
+* **Persistência:** Conforme instruído nos requisitos, as transações não são persistidas em uma tabela própria (histórico). A persistência é focada na entidade de **Cartão**, onde o impacto das transações autorizadas é refletido diretamente na atualização do saldo disponível no banco de dados.
+
+---
+
 #Teste de programação - VR Benefícios
 
 Como parte do processo de seleção, gostaríamos que você desenvolvesse um pequeno sistema, para que possamos ver melhor o seu trabalho.
