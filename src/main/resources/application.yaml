@@ -1,6 +1,12 @@
 spring:
   application:
     name: miniautorizador
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  web:
+    resources:
+      add-mappings: true
 
   datasource:
     url: jdbc:mysql://localhost:3306/miniautorizador?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -15,6 +21,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    doc-expansion: none
+    filter: true
+    persistAuthorization: true
+    # Desabilita a autenticação automática para os recursos do Swagger UI
+    oauth2RedirectUrl: /swagger-ui/oauth2-redirect.html
+  show-actuator: false
+  # Desabilita a autenticação para os endpoints do Swagger
+  paths-to-match: /**
 
 # Credenciais de acesso à API (Basic Auth)
 # Estas credenciais foram definidas no arquivo de configuração apenas para garantir a
