@@ -34,6 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("Inicializando configuração de filtros de segurança.");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,11 +51,13 @@ public class SecurityConfig {
                 )
                 .httpBasic(Customizer.withDefaults());
 
+        log.info("Filtros de segurança aplicados com sucesso.");
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
+        log.info("Configurando autenticação em memória para o usuário: {}", apiUser);
         UserDetails user = User
                 .withUsername(apiUser)
                 .password("{noop}" + apiPass)

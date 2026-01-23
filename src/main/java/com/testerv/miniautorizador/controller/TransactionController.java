@@ -2,7 +2,6 @@ package com.testerv.miniautorizador.controller;
 
 import com.testerv.miniautorizador.dto.TransactionDTO;
 import com.testerv.miniautorizador.enums.TransactionStatus;
-import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -69,18 +68,7 @@ public class TransactionController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> authorizeTransaction(@RequestBody TransactionDTO dto) {
-        log.info("Iniciando tentativa de transação para o cartão: {}", dto.numeroCartao());
-
-        try {
-            transactionService.authorize(dto);
-            log.info("Transação autorizada com sucesso. Cartão: {}, Valor: {}",
-                    dto.numeroCartao(), dto.valor());
-            return ResponseEntity.status(HttpStatus.CREATED).body(TransactionStatus.OK.getDescription());
-
-        } catch (TransactionException e) {
-            log.warn("Transação negada para o cartão {}. Motivo: {}",
-                    dto.numeroCartao(), e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
-        }
+        transactionService.authorize(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(TransactionStatus.OK.getDescription());
     }
 }

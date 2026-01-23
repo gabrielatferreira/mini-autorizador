@@ -2,9 +2,12 @@ package com.testerv.miniautorizador.service;
 
 import com.testerv.miniautorizador.dto.CardRequestDTO;
 import com.testerv.miniautorizador.enums.TransactionStatus;
+import com.testerv.miniautorizador.exception.CardAlreadyExistsException;
+import com.testerv.miniautorizador.exception.CardNotFoundException;
 import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.repository.CardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import java.math.BigDecimal;
  * consulta de saldos, interagindo diretamente com a camada de persistência.
  * </p>
  */
+@Slf4j
 @Service
 public class CardService {
 
@@ -40,10 +44,12 @@ public class CardService {
     @Transactional
     public Card create(CardRequestDTO dto) {
         if (cardRepository.existsById(dto.numeroCartao())) {
-            throw new TransactionException(dto.numeroCartao());
+            log.warn("Falha ao criar cartão: {} já existe no sistema.", dto.numeroCartao());
+            throw new CardAlreadyExistsException(dto.numeroCartao(), dto.senha());
         }
 
         Card card = new Card(dto.numeroCartao(), dto.senha());
+        log.info("Novo cartão criado com sucesso: {}", dto.numeroCartao());
         return cardRepository.save(card);
     }
 
@@ -54,8 +60,16 @@ public class CardService {
      * @throws TransactionException Se o cartão não for encontrado na base de dados.
      */
     public BigDecimal getBalance(String cardNumber) {
+        log.debug("Consultando saldo para o cartão: {}", cardNumber);
+
         return cardRepository.findById(cardNumber)
-                .map(Card::getBalance)
-                .orElseThrow(() -> new TransactionException(TransactionStatus.CARTAO_INEXISTENTE.getDescription()));
+                .map(card -> {
+                    log.info("Saldo consultado para o cartão {}: {}", cardNumber, card.getBalance());
+                    return card.getBalance();
+                })
+                .orElseThrow(() -> {
+                    log.warn("Cartão inexistente: {}", cardNumber);
+                    return new CardNotFoundException();
+                });
     }
 }

@@ -2,7 +2,6 @@ package com.testerv.miniautorizador.controller;
 
 import com.testerv.miniautorizador.dto.CardRequestDTO;
 import com.testerv.miniautorizador.dto.CardResponseDTO;
-import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,16 +58,8 @@ public class CardController {
     })
     @PostMapping
     public ResponseEntity<CardResponseDTO> createCard(@RequestBody CardRequestDTO dto) {
-        log.info("Tentativa de criação de cartão: {}", dto.numeroCartao());
-        try {
-            Card newCard = cardService.create(dto);
-            log.info("Cartão criado com sucesso: {}", dto.numeroCartao());
-            return ResponseEntity.status(HttpStatus.CREATED).body(CardResponseDTO.fromEntity(newCard));
-        } catch (TransactionException e) {
-            log.warn("Falha ao criar cartão {}: Já existe na base", dto.numeroCartao());
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(new CardResponseDTO(dto.senha(), dto.numeroCartao()));
-        }
+        Card newCard = cardService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CardResponseDTO.fromEntity(newCard));
     }
 
     @Operation(
@@ -85,13 +76,7 @@ public class CardController {
     public ResponseEntity<BigDecimal> getBalance(
             @Parameter(description = "Número do cartão com 16 dígitos", required = true)
             @PathVariable String cardNumber) {
-        try {
-            BigDecimal balance = cardService.getBalance(cardNumber);
-            log.info("Consulta de saldo para o cartão {}: Saldo = {}", cardNumber, balance);
-            return ResponseEntity.ok(balance);
-        } catch (TransactionException e) {
-            log.warn("Consulta de saldo falhou: Cartão {} não encontrado", cardNumber);
-            return ResponseEntity.notFound().build();
-        }
+        BigDecimal balance = cardService.getBalance(cardNumber);
+        return ResponseEntity.ok(balance);
     }
 }
