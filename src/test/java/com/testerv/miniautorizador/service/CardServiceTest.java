@@ -1,6 +1,8 @@
 package com.testerv.miniautorizador.service;
 
 import com.testerv.miniautorizador.dto.CardRequestDTO;
+import com.testerv.miniautorizador.exception.CardAlreadyExistsException;
+import com.testerv.miniautorizador.exception.CardNotFoundException;
 import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.repository.CardRepository;
@@ -51,11 +53,12 @@ class CardServiceTest {
 
         when(cardRepository.existsById(DEFAULT_CARD_NUMBER)).thenReturn(true);
 
-        TransactionException exception = assertThrows(TransactionException.class, () -> {
+        CardAlreadyExistsException exception = assertThrows(CardAlreadyExistsException.class, () -> {
             cardService.create(request);
         });
 
-        assertEquals(DEFAULT_CARD_NUMBER, exception.getMessage());
+        assertEquals(DEFAULT_CARD_NUMBER, exception.getCardNumber());
+        assertEquals(DEFAULT_PASSWORD, exception.getPassword());
 
         verify(cardRepository, never()).save(any(Card.class));
     }
@@ -77,6 +80,8 @@ class CardServiceTest {
     void shouldThrowExceptionWhenCardNotFound() {
         when(cardRepository.findById(DEFAULT_CARD_NUMBER)).thenReturn(java.util.Optional.empty());
 
-        assertThrows(TransactionException.class, () -> cardService.getBalance(DEFAULT_CARD_NUMBER));
+        assertThrows(CardNotFoundException.class, () -> cardService.getBalance(DEFAULT_CARD_NUMBER));
+
+        verify(cardRepository).findById(DEFAULT_CARD_NUMBER);
     }
 }

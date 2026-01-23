@@ -5,6 +5,7 @@ import com.testerv.miniautorizador.enums.TransactionStatus;
 import com.testerv.miniautorizador.exception.TransactionException;
 import com.testerv.miniautorizador.model.Card;
 import com.testerv.miniautorizador.repository.CardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
  * 3. Verificação de saldo suficiente.
  * </p>
  */
+@Slf4j
 @Service
 public class TransactionService {
 
@@ -41,11 +43,15 @@ public class TransactionService {
      */
     @Transactional
     public void authorize(TransactionDTO dto) {
+        log.info("Iniciando processamento de transação para o cartão: {}", dto.numeroCartao());
+
         Card card = getCardCheckingExistence(dto.numeroCartao());
         validatePassword(card, dto.senhaCartao());
         validateBalance(card, dto.valor());
         executeDebit(card, dto.valor());
         cardRepository.save(card);
+        log.info("Débito realizado com sucesso. Novo saldo do cartão {}: {}",
+                card.getCardNumber(), card.getBalance());
     }
 
     /**
@@ -55,8 +61,12 @@ public class TransactionService {
      * @throws TransactionException Se o cartão não for encontrado.
      */
     private Card getCardCheckingExistence(String cardNumber) {
+        log.debug("Buscando cartão {} com trava pessimista.", cardNumber);
         return cardRepository.findByCardNumberWithLock(cardNumber)
-                .orElseThrow(() -> new TransactionException(TransactionStatus.CARTAO_INEXISTENTE.getDescription()));
+                .orElseThrow(() -> {
+                    log.warn("[NEGADA] Tentativa de transação para cartão inexistente: {}", cardNumber);
+                    return new TransactionException(TransactionStatus.CARTAO_INEXISTENTE.getDescription());
+                });
     }
 
     /**
@@ -65,6 +75,8 @@ public class TransactionService {
      * @param value O valor a ser debitado.
      */
     private void executeDebit(Card card, BigDecimal value) {
+        log.debug("Efetuando débito de {} no cartão {}. Saldo anterior: {}",
+                value, card.getCardNumber(), card.getBalance());
         card.setBalance(card.getBalance().subtract(value));
     }
 
@@ -76,7 +88,10 @@ public class TransactionService {
      */
     private void validatePassword(Card card, String providedPassword) {
         boolean isInvalid = !card.getPassword().equals(providedPassword);
-        if (isInvalid) throw new TransactionException(TransactionStatus.SENHA_INVALIDA.getDescription());
+        if (isInvalid) {
+            log.warn("Senha inválida para o cartão: {}", card.getCardNumber());
+            throw new TransactionException(TransactionStatus.SENHA_INVALIDA.getDescription());
+        }
     }
 
     /**
@@ -87,6 +102,10 @@ public class TransactionService {
      */
     private void validateBalance(Card card, BigDecimal value) {
         boolean hasNoFunds = card.getBalance().compareTo(value) < 0;
-        if (hasNoFunds) throw new TransactionException(TransactionStatus.SALDO_INSUFICIENTE.getDescription());
+        if (hasNoFunds) {
+            log.warn("Saldo insuficiente no cartão: {}. Saldo atual: {}, Valor solicitado: {}",
+                    card.getCardNumber(), card.getBalance(), value);
+            throw new TransactionException(TransactionStatus.SALDO_INSUFICIENTE.getDescription());
+        }
     }
 }
