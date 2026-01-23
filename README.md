@@ -28,7 +28,7 @@ mvn spring-boot:run
 
 ## 🛠️ **Tecnologias Utilizadas**
 
-* Java 21 & Spring Boot 3.5.9
+* Java 21 & Spring Boot 3.4.2
 * Spring Data JPA & Hibernate
 * MySQL 5.7 (Persistência de Cartões)
 * Spring Security (Autenticação Basic Auth)
