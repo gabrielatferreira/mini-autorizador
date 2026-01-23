@@ -1,6 +1,6 @@
 # 💳 Mini-Autorizador VR
 
-Este projeto é uma implementação de um autorizador de transações de benefícios (Refeição/Alimentação). A solução foca em robustez, consistência de dados em cenários de alta concorrência e clareza de código seguindo os princípios de Clean Code.
+Este projeto é um **microserviço autorizador de transações** de benefícios (Vale Refeição/Vale Alimentação). A arquitetura prioriza a **robustez** e a **consistência transacional**; para lidar com alta concorrência, utiliza travas de banco de dados com **Pessimistic Locking (Pessimistic Write)** que asseguram a atomicidade das operações de saldo. O código segue os princípios de **Clean Code**, garantindo um sistema escalável, seguro e de fácil manutenção sob a plataforma **Spring Boot**.
 
 ---
 
@@ -12,7 +12,13 @@ Este projeto é uma implementação de um autorizador de transações de benefí
 * Maven 3.8+
 
 ### 2. Subindo o Banco de Dados (MySQL)
-O projeto utiliza o MySQL conforme especificado no desafio. Para subir o container:
+O projeto utiliza o MySQL via Docker. Para inicializar o banco de dados corretamente, você deve navegar até o diretório onde o arquivo de configuração se encontra:
+#### a. Acesse a pasta docker:
+```bash
+cd docker
+```
+
+#### b. Suba o container:
 ```bash
 docker-compose up -d
 ```
@@ -20,6 +26,13 @@ docker-compose up -d
 **Nota:** Se houver erro de porta ocupada (3306), certifique-se de que não há um serviço MySQL local rodando no seu sistema operacional.
 
 ### 3. Rodando a aplicação
+Após subir o banco de dados, é necessário retornar à raiz do projeto para executar o Maven:
+#### a. Volte para a pasta principal:
+```bash
+cd ..
+```
+
+#### b. Execute o Spring Boot:
 ```bash
 mvn spring-boot:run
 ```
