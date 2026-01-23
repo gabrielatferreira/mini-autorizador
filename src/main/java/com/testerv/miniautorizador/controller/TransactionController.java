@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,13 +50,14 @@ public class TransactionController {
             @ApiResponse(
                     responseCode = "201",
                     description = "Transação autorizada com sucesso",
-                    content = @Content(mediaType = "application/json",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class),
                             examples = @ExampleObject(value = "OK"))
             ),
             @ApiResponse(
                     responseCode = "422",
                     description = "Transação negada (Saldo insuficiente, Senha inválida ou Cartão inexistente)",
-                    content = @Content(mediaType = "application/json",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                             schema = @Schema(implementation = String.class),
                             examples = {
                                     @ExampleObject(name = "Saldo Insuficiente", value = "SALDO_INSUFICIENTE"),
@@ -65,7 +67,7 @@ public class TransactionController {
             ),
             @ApiResponse(responseCode = "401", description = "Erro de autenticação")
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> authorizeTransaction(@RequestBody TransactionDTO dto) {
         log.info("Iniciando tentativa de transação para o cartão: {}", dto.numeroCartao());
 

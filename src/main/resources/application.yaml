@@ -1,9 +1,7 @@
 spring:
   application:
     name: miniautorizador
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
+
   web:
     resources:
       add-mappings: true
@@ -29,15 +27,7 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
     tagsSorter: alpha
-    tryItOutEnabled: true
-    doc-expansion: none
-    filter: true
-    persistAuthorization: true
-    # Desabilita a autenticação automática para os recursos do Swagger UI
-    oauth2RedirectUrl: /swagger-ui/oauth2-redirect.html
-  show-actuator: false
-  # Desabilita a autenticação para os endpoints do Swagger
-  paths-to-match: /**
+    enabled: true
 
 # Credenciais de acesso à API (Basic Auth)
 # Estas credenciais foram definidas no arquivo de configuração apenas para garantir a
