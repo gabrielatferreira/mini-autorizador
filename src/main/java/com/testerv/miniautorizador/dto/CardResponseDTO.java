@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @param numeroCartao O número identificador do cartão.
  */
 @Schema(description = "Representação de resposta para criação de cartão")
-@JsonPropertyOrder({ "senha", "numeroCartao" }) // Garante a ordem exata no JSON
+@JsonPropertyOrder({ "senha", "numeroCartao" })
 public record CardResponseDTO(
 
         @Schema(description = "Senha do cartão", example = "1234")
